@@ -1,6 +1,35 @@
-$(document).ready(function() {
-    // Initial data to make the UI look good on first load
-    let books = [
+$(function() {
+    // Small jQuery part: smooth scrolling for landing-page anchor links.
+    $('a[href^="#"]').on('click', function(event) {
+        const target = $(this.getAttribute('href'));
+        if (target.length) {
+            event.preventDefault();
+            $('html, body').stop().animate({ scrollTop: target.offset().top - 80 }, 1000);
+        }
+    });
+
+    // Main JavaScript part: dashboard data, rendering, validation, and events.
+    const form = document.getElementById('book-form');
+    if (!form) return;
+
+    const key = 'fet_books';
+    const el = id => document.getElementById(id);
+    const bookList = el('book-list');
+    const bookTable = el('book-table');
+    const noResults = el('no-results');
+    const bookCount = el('book-count');
+    const formTitle = el('form-title');
+    const submitBtn = el('submit-btn');
+    const cancelBtn = el('cancel-btn');
+    const editIndexInput = el('edit-index');
+    const inputs = {
+        id: el('book-id'),
+        title: el('book-title'),
+        author: el('book-author'),
+        category: el('book-category')
+    };
+
+    let books = JSON.parse(localStorage.getItem(key)) || [
         { id: "FET-001", title: "Engineering Drawing for Cameroon Students", author: "Ngwa Patrick", category: "Mechanical Engineering" },
         { id: "FET-002", title: "Programming Fundamentals with JavaScript", author: "Manga Rose", category: "Software Engineering" },
         { id: "FET-003", title: "Power Systems and Electrical Machines", author: "Tchaptchet Emmanuel", category: "Electrical Engineering" },
@@ -8,140 +37,89 @@ $(document).ready(function() {
         { id: "FET-005", title: "Telecommunications Networks in Cameroon", author: "Biyong Alain", category: "Telecommunications" }
     ];
 
-    // Load from localStorage if exists
-    const storedBooks = localStorage.getItem('fet_books');
-    if (storedBooks) {
-        books = JSON.parse(storedBooks);
-    }
-
-    // Render books to table
     function renderBooks(filter = "") {
-        const $bookList = $('#book-list');
-        $bookList.empty();
-        
-        const filteredBooks = books.filter(book => 
-            book.title.toLowerCase().includes(filter.toLowerCase())
-        );
+        const term = filter.toLowerCase();
+        const filteredBooks = books.filter(book => book.title.toLowerCase().includes(term));
 
-        if (filteredBooks.length === 0) {
-            $('#no-results').show();
-            $('#book-table').hide();
-        } else {
-            $('#no-results').hide();
-            $('#book-table').show();
-            
-            filteredBooks.forEach((book, index) => {
-                const actualIndex = books.indexOf(book);
-                $bookList.append(`
-                    <tr>
-                        <td><strong>${book.id}</strong></td>
-                        <td>${book.title}</td>
-                        <td>${book.author}</td>
-                        <td><span class="badge">${book.category}</span></td>
-                        <td class="actions">
-                            <button class="btn-edit" data-index="${actualIndex}">Edit</button>
-                            <button class="btn-delete" data-index="${actualIndex}">Delete</button>
-                        </td>
-                    </tr>
-                `);
-            });
-        }
-        
-        $('#book-count').text(`Total Books: ${books.length}`);
-        localStorage.setItem('fet_books', JSON.stringify(books));
+        bookList.innerHTML = filteredBooks.map(book => {
+            const index = books.indexOf(book);
+            return `
+                <tr>
+                    <td><strong>${book.id}</strong></td>
+                    <td>${book.title}</td>
+                    <td>${book.author}</td>
+                    <td><span class="badge">${book.category}</span></td>
+                    <td class="actions">
+                        <button class="btn-edit" data-index="${index}">Edit</button>
+                        <button class="btn-delete" data-index="${index}">Delete</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        noResults.style.display = filteredBooks.length ? 'none' : 'block';
+        bookTable.style.display = filteredBooks.length ? 'table' : 'none';
+        bookCount.textContent = `Total Books: ${books.length}`;
+        localStorage.setItem(key, JSON.stringify(books));
     }
 
-    // Add / Update Book
-    $('#book-form').on('submit', function(e) {
-        e.preventDefault();
-        
-        const editIndex = parseInt($('#edit-index').val());
-        const id = $('#book-id').val().trim();
-        const title = $('#book-title').val().trim();
-        const author = $('#book-author').val().trim();
-        const category = $('#book-category').val();
+    function getFormData() {
+        return {
+            id: inputs.id.value.trim(),
+            title: inputs.title.value.trim(),
+            author: inputs.author.value.trim(),
+            category: inputs.category.value
+        };
+    }
 
-        // Validation: Duplicate ID check (only if not editing or if ID changed)
-        const isDuplicate = books.some((book, index) => book.id === id && index !== editIndex);
+    function fillForm(book, index) {
+        formTitle.textContent = 'Edit Book';
+        submitBtn.textContent = 'Update Book';
+        cancelBtn.style.display = 'block';
+        editIndexInput.value = index;
+        Object.keys(inputs).forEach(field => inputs[field].value = book[field]);
+        document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function resetForm() {
+        formTitle.textContent = 'Register Book';
+        submitBtn.textContent = 'Add Book to Catalog';
+        cancelBtn.style.display = 'none';
+        editIndexInput.value = '-1';
+        form.reset();
+    }
+
+    form.addEventListener('submit', event => {
+        event.preventDefault();
+
+        const editIndex = Number(editIndexInput.value);
+        const bookData = getFormData();
+        const isDuplicate = books.some((book, index) => book.id === bookData.id && index !== editIndex);
+
         if (isDuplicate) {
             alert("Error: A book with this ID already exists in the system.");
             return;
         }
 
-        const bookData = { id, title, author, category };
-
-        if (editIndex === -1) {
-            // Create
-            books.push(bookData);
-        } else {
-            // Update
-            books[editIndex] = bookData;
-            resetForm();
-        }
-
+        editIndex === -1 ? books.push(bookData) : books[editIndex] = bookData;
         renderBooks();
-        this.reset();
+        resetForm();
     });
 
-    // Edit Book
-    $(document).on('click', '.btn-edit', function() {
-        const index = $(this).data('index');
-        const book = books[index];
+    bookList.addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button) return;
 
-        $('#form-title').text('Edit Book');
-        $('#submit-btn').text('Update Book');
-        $('#cancel-btn').show();
-        $('#edit-index').val(index);
-        
-        $('#book-id').val(book.id);
-        $('#book-title').val(book.title);
-        $('#book-author').val(book.author);
-        $('#book-category').val(book.category);
-        
-        // Scroll to form
-        $('html, body').animate({
-            scrollTop: $(".card").offset().top - 120
-        }, 500);
-    });
+        const index = Number(button.dataset.index);
+        if (button.classList.contains('btn-edit')) fillForm(books[index], index);
 
-    // Delete Book
-    $(document).on('click', '.btn-delete', function() {
-        if (confirm("Are you sure you want to remove this book from the catalog?")) {
-            const index = $(this).data('index');
+        if (button.classList.contains('btn-delete') && confirm("Are you sure you want to remove this book from the catalog?")) {
             books.splice(index, 1);
             renderBooks();
         }
     });
 
-    // Search functionality
-    $('#search-input').on('keyup', function() {
-        renderBooks($(this).val());
-    });
-
-    // Cancel Edit
-    $('#cancel-btn').on('click', function() {
-        resetForm();
-    });
-
-    function resetForm() {
-        $('#form-title').text('Register Book');
-        $('#submit-btn').text('Add Book to Catalog');
-        $('#cancel-btn').hide();
-        $('#edit-index').val('-1');
-        $('#book-form')[0].reset();
-    }
-
-    // Smooth scroll for landing page
-    $('a[href^="#"]').on('click', function(event) {
-        var target = $(this.getAttribute('href'));
-        if( target.length ) {
-            event.preventDefault();
-            $('html, body').stop().animate({
-                scrollTop: target.offset().top - 80
-            }, 1000);
-        }
-    });
-
-    // Initial render
+    el('search-input').addEventListener('keyup', event => renderBooks(event.target.value));
+    cancelBtn.addEventListener('click', resetForm);
     renderBooks();
 });

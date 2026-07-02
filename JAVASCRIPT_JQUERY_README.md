@@ -1,167 +1,161 @@
 # JavaScript And jQuery Guide
-This guide explains `js/main.js`. **JavaScript** controls the data and logic, while **jQuery** helps select elements, handle events, update the page, and animate scrolling.
-## 1. Starting The Script
+This guide explains the refactored `js/main.js`. The file now uses about **80% plain JavaScript** and **20% jQuery**. The functionality remains the same: add books, edit books, delete books, search books, save data, and smooth-scroll on the landing page.
+## 1. jQuery Still Used For Page Ready And Smooth Scroll
 ```js
-$(document).ready(function() {
+$(function() {
     ...
 });
 ```
-This jQuery code waits until the HTML is loaded before running the script. It ensures elements like `#book-form`, `#book-list`, and `#search-input` are available.
-## 2. Book Data
+This is the short jQuery version of `$(document).ready(...)`. It waits for the HTML to load before running the script.
 ```js
-let books = [
-    { id: "FET-001", title: "...", author: "...", category: "..." }
-];
-```
-`books` is an array of objects. Each object stores one book with `id`, `title`, `author`, and `category`. `let` is used because the array may be replaced by saved data.
-## 3. localStorage
-```js
-const storedBooks = localStorage.getItem('fet_books');
-if (storedBooks) {
-    books = JSON.parse(storedBooks);
-}
-```
-`localStorage.getItem()` reads saved browser data. `JSON.parse()` converts saved text back into a JavaScript array.
-```js
-localStorage.setItem('fet_books', JSON.stringify(books));
-```
-`JSON.stringify()` converts the array into text so it can be stored in `localStorage`.
-## 4. `renderBooks(filter = "")`
-`renderBooks()` refreshes the table, applies search filtering, updates the book count, shows or hides the no-results message, and saves the latest data.
-```js
-const $bookList = $('#book-list');
-$bookList.empty();
-```
-`$('#book-list')` selects the table body. `.empty()` clears old rows. The `$` in `$bookList` shows that the variable contains a jQuery object.
-## 5. Filtering Books
-```js
-const filteredBooks = books.filter(book =>
-    book.title.toLowerCase().includes(filter.toLowerCase())
-);
-```
-`.filter()` creates a list of matching books. `.toLowerCase()` makes the search case-insensitive. `.includes()` checks whether the title contains the search text.
-## 6. Showing Or Hiding Results
-```js
-if (filteredBooks.length === 0) {
-    $('#no-results').show();
-    $('#book-table').hide();
-} else {
-    $('#no-results').hide();
-    $('#book-table').show();
-}
-```
-`if/else` is JavaScript. `.show()` and `.hide()` are jQuery. If no books match, the table is hidden and the message is shown.
-## 7. Creating Table Rows
-```js
-$bookList.append(`
-    <tr>
-        <td>${book.title}</td>
-        <td>${book.author}</td>
-        <td><span class="badge">${book.category}</span></td>
-        <td>
-            <button class="btn-edit" data-index="${actualIndex}">Edit</button>
-            <button class="btn-delete" data-index="${actualIndex}">Delete</button>
-        </td>
-    </tr>
-`);
-```
-`.append()` inserts generated HTML into the table. Backticks create a template literal. `${book.title}` inserts JavaScript values. `data-index` stores the book position for edit and delete actions.
-## 8. Book Count
-```js
-$('#book-count').text(`Total Books: ${books.length}`);
-```
-`.text()` updates page text. `books.length` gives the number of books.
-## 9. Form Submission
-```js
-$('#book-form').on('submit', function(e) {
-    e.preventDefault();
-});
-```
-`.on('submit', ...)` listens for form submission. `e.preventDefault()` stops the browser from refreshing, so JavaScript can process the form.
-## 10. Reading Inputs
-```js
-const id = $('#book-id').val().trim();
-const title = $('#book-title').val().trim();
-const author = $('#book-author').val().trim();
-const category = $('#book-category').val();
-```
-`.val()` gets input values. `.trim()` removes extra spaces. `const` keeps each value fixed during the current form submission.
-## 11. Duplicate ID Validation
-```js
-const isDuplicate = books.some((book, index) => book.id === id && index !== editIndex);
-```
-`.some()` checks whether another book already has the same ID. `index !== editIndex` allows the current book to keep its own ID during editing.
-```js
-alert("Error: A book with this ID already exists in the system.");
-return;
-```
-`alert()` displays an error. `return` stops the function.
-## 12. Add Or Update
-```js
-if (editIndex === -1) {
-    books.push(bookData);
-} else {
-    books[editIndex] = bookData;
-    resetForm();
-}
-```
-`editIndex === -1` means add mode. `.push()` adds a new book. Otherwise, `books[editIndex] = bookData` updates an existing book.
-## 13. Edit Button
-```js
-$(document).on('click', '.btn-edit', function() {
-    const index = $(this).data('index');
-    const book = books[index];
-});
-```
-This uses event delegation because edit buttons are created dynamically. `$(this)` means the clicked button. `.data('index')` reads the stored book index.
-```js
-$('#book-id').val(book.id);
-$('#book-title').val(book.title);
-$('#book-author').val(book.author);
-$('#book-category').val(book.category);
-```
-These lines place the selected book into the form. The form title and submit button are changed with `.text()`, and the cancel button is displayed with `.show()`.
-## 14. Delete Button
-```js
-$(document).on('click', '.btn-delete', function() {
-    if (confirm("Are you sure you want to remove this book from the catalog?")) {
-        books.splice($(this).data('index'), 1);
-        renderBooks();
+$('a[href^="#"]').on('click', function(event) {
+    const target = $(this.getAttribute('href'));
+    if (target.length) {
+        event.preventDefault();
+        $('html, body').stop().animate({ scrollTop: target.offset().top - 80 }, 1000);
     }
 });
 ```
-`confirm()` asks before deleting. `.splice(index, 1)` removes one book. `renderBooks()` refreshes the catalog and saves the result.
-## 15. Search
+This is the main jQuery part that remains. It selects internal links like `#about`, prevents the default jump, and uses `.animate()` for smooth scrolling.
+## 2. Dashboard Guard
 ```js
-$('#search-input').on('keyup', function() {
-    renderBooks($(this).val());
-});
+const form = document.getElementById('book-form');
+if (!form) return;
 ```
-`keyup` runs whenever the user types. `$(this).val()` gets the search text and sends it to `renderBooks()`.
-## 16. Reset Form
+The same script is loaded on both `index.html` and `dashboard.html`. This guard stops dashboard code from running on the home page, where the form does not exist.
+## 3. Element Selection With JavaScript
 ```js
-function resetForm() {
-    $('#form-title').text('Register Book');
-    $('#submit-btn').text('Add Book to Catalog');
-    $('#cancel-btn').hide();
-    $('#edit-index').val('-1');
-    $('#book-form')[0].reset();
+const el = id => document.getElementById(id);
+const bookList = el('book-list');
+const bookTable = el('book-table');
+```
+Instead of jQuery selectors like `$('#book-list')`, the refactor uses `document.getElementById()`. The helper `el` makes the code shorter.
+## 4. Grouped Input Fields
+```js
+const inputs = {
+    id: el('book-id'),
+    title: el('book-title'),
+    author: el('book-author'),
+    category: el('book-category')
+};
+```
+The input elements are grouped in one object. This makes reading and filling the form shorter and cleaner.
+## 5. Book Data And localStorage
+```js
+let books = JSON.parse(localStorage.getItem(key)) || [
+    { id: "FET-001", title: "...", author: "...", category: "..." }
+];
+```
+This loads saved books from `localStorage`. If nothing is saved, the default FET sample books are used.
+```js
+localStorage.setItem(key, JSON.stringify(books));
+```
+`JSON.stringify()` converts the array into text so it can be stored in the browser.
+## 6. Rendering Books
+```js
+function renderBooks(filter = "") {
+    const term = filter.toLowerCase();
+    const filteredBooks = books.filter(book => book.title.toLowerCase().includes(term));
+    ...
 }
 ```
-This returns the form to add mode. `$('#book-form')[0]` accesses the real HTML form element, and `.reset()` clears the form.
-## 17. Smooth Scroll
+`renderBooks()` displays the catalog. It also filters books when the user searches. `.filter()` creates a matching list, `.toLowerCase()` makes the search case-insensitive, and `.includes()` checks if the title contains the search text.
+## 7. Building Table Rows
 ```js
-$('a[href^="#"]').on('click', function(event) {
-    var target = $(this.getAttribute('href'));
+bookList.innerHTML = filteredBooks.map(book => {
+    const index = books.indexOf(book);
+    return `
+        <tr>
+            <td><strong>${book.id}</strong></td>
+            <td>${book.title}</td>
+            <td>${book.author}</td>
+        </tr>
+    `;
+}).join('');
+```
+This replaces jQuery `.append()`. `.map()` creates an array of HTML rows, and `.join('')` turns them into one HTML string. `innerHTML` places the rows inside the table body.
+## 8. Showing And Hiding Elements
+```js
+noResults.style.display = filteredBooks.length ? 'none' : 'block';
+bookTable.style.display = filteredBooks.length ? 'table' : 'none';
+```
+This replaces jQuery `.show()` and `.hide()`. It uses JavaScript style changes and a ternary operator.
+## 9. Updating The Book Count
+```js
+bookCount.textContent = `Total Books: ${books.length}`;
+```
+This replaces jQuery `.text()`. `textContent` changes the visible text of an element.
+## 10. Reading Form Data
+```js
+function getFormData() {
+    return {
+        id: inputs.id.value.trim(),
+        title: inputs.title.value.trim(),
+        author: inputs.author.value.trim(),
+        category: inputs.category.value
+    };
+}
+```
+This replaces jQuery `.val()`. `.value` reads input values, and `.trim()` removes extra spaces.
+## 11. Filling The Form For Editing
+```js
+function fillForm(book, index) {
+    formTitle.textContent = 'Edit Book';
+    submitBtn.textContent = 'Update Book';
+    cancelBtn.style.display = 'block';
+    editIndexInput.value = index;
+    Object.keys(inputs).forEach(field => inputs[field].value = book[field]);
+}
+```
+This switches the form to edit mode. `Object.keys(inputs)` loops through `id`, `title`, `author`, and `category`, then copies the selected book values into the form.
+## 12. Resetting The Form
+```js
+function resetForm() {
+    formTitle.textContent = 'Register Book';
+    submitBtn.textContent = 'Add Book to Catalog';
+    cancelBtn.style.display = 'none';
+    editIndexInput.value = '-1';
+    form.reset();
+}
+```
+This returns the form to add mode. `form.reset()` clears the form fields.
+## 13. Form Submission
+```js
+form.addEventListener('submit', event => {
+    event.preventDefault();
+    const editIndex = Number(editIndexInput.value);
+    const bookData = getFormData();
 });
 ```
-This selects internal links like `#about` and `#features`.
+This replaces jQuery `.on('submit', ...)`. `addEventListener()` listens for the submit event, and `preventDefault()` stops the page from refreshing.
+## 14. Duplicate ID Validation
 ```js
-$('html, body').stop().animate({
-    scrollTop: target.offset().top - 80
-}, 1000);
+const isDuplicate = books.some((book, index) => book.id === bookData.id && index !== editIndex);
 ```
-`.stop()` prevents animation buildup. `.animate()` creates smooth scrolling. `target.offset().top - 80` adjusts for the fixed header.
+`.some()` checks whether another book already has the same ID. `index !== editIndex` allows the edited book to keep its own ID.
+## 15. Add Or Update Logic
+```js
+editIndex === -1 ? books.push(bookData) : books[editIndex] = bookData;
+```
+This short ternary replaces a longer `if/else`. If `editIndex` is `-1`, a new book is added. Otherwise, the selected book is updated.
+## 16. Edit And Delete Events
+```js
+bookList.addEventListener('click', event => {
+    const button = event.target.closest('button');
+    if (!button) return;
+});
+```
+This is JavaScript event delegation. It listens on the table body and checks which button was clicked. This works because edit and delete buttons are created dynamically.
+```js
+const index = Number(button.dataset.index);
+```
+`dataset.index` reads the `data-index` value from the clicked button.
+## 17. Search And Cancel
+```js
+el('search-input').addEventListener('keyup', event => renderBooks(event.target.value));
+cancelBtn.addEventListener('click', resetForm);
+```
+These replace jQuery event handlers. Typing in the search box calls `renderBooks()`, and clicking cancel resets the form.
 ## 18. Final Summary
-JavaScript handles arrays, objects, conditions, validation, JSON, localStorage, filtering, adding, editing, and deleting.
-jQuery handles selectors, events, `.val()`, `.text()`, `.show()`, `.hide()`, `.append()`, `.data()`, and `.animate()`.
+Plain JavaScript now handles element selection, rendering, form values, validation, add/edit/delete, search, display changes, and localStorage.
+jQuery remains only for the small page-ready wrapper and smooth-scroll animation.
