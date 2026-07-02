@@ -29,13 +29,14 @@ $(function() {
         category: el('book-category')
     };
 
-    let books = JSON.parse(localStorage.getItem(key)) || [
+    const defaultBooks = [
         { id: "FET-001", title: "Engineering Drawing for Cameroon Students", author: "Ngwa Patrick", category: "Mechanical Engineering" },
         { id: "FET-002", title: "Programming Fundamentals with JavaScript", author: "Manga Rose", category: "Software Engineering" },
         { id: "FET-003", title: "Power Systems and Electrical Machines", author: "Tchaptchet Emmanuel", category: "Electrical Engineering" },
         { id: "FET-004", title: "Construction Materials and Site Practice", author: "Nfor Linda", category: "Civil Engineering" },
         { id: "FET-005", title: "Telecommunications Networks in Cameroon", author: "Biyong Alain", category: "Telecommunications" }
     ];
+    let books = JSON.parse(localStorage.getItem(key)) || defaultBooks;
 
     function renderBooks(filter = "") {
         const term = filter.toLowerCase();
@@ -119,7 +120,18 @@ $(function() {
         }
     });
 
-    el('search-input').addEventListener('keyup', event => renderBooks(event.target.value));
-    cancelBtn.addEventListener('click', resetForm);
-    renderBooks();
+    // Small jQuery part: simple dashboard events.
+    $('#search-input').on('keyup', function() {
+        renderBooks(this.value);
+    });
+    $('#cancel-btn').on('click', resetForm);
+
+    if (localStorage.getItem(key)) {
+        renderBooks();
+    } else {
+        $.getJSON('data/default-books.json').done(data => {
+            books = data;
+            renderBooks();
+        }).fail(renderBooks);
+    }
 });

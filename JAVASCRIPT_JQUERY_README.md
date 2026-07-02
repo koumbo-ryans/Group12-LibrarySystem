@@ -1,5 +1,5 @@
 # JavaScript And jQuery Guide
-This guide explains the refactored `js/main.js`. The file now uses about **80% plain JavaScript** and **20% jQuery**. The functionality remains the same: add books, edit books, delete books, search books, save data, and smooth-scroll on the landing page.
+This guide explains the refactored `js/main.js`. The file now uses mostly **plain JavaScript**, with a small amount of **jQuery** for smooth scrolling, AJAX loading, search typing, and cancel-click handling. The functionality remains the same: add books, edit books, delete books, search books, save data, and load starter books.
 ## 1. jQuery Still Used For Page Ready And Smooth Scroll
 ```js
 $(function() {
@@ -16,7 +16,7 @@ $('a[href^="#"]').on('click', function(event) {
     }
 });
 ```
-This is the main jQuery part that remains. It selects internal links like `#about`, prevents the default jump, and uses `.animate()` for smooth scrolling.
+This selects internal links like `#about`, prevents the default jump, and uses `.animate()` for smooth scrolling.
 ## 2. Dashboard Guard
 ```js
 const form = document.getElementById('book-form');
@@ -51,7 +51,15 @@ This loads saved books from `localStorage`. If nothing is saved, the default FET
 localStorage.setItem(key, JSON.stringify(books));
 ```
 `JSON.stringify()` converts the array into text so it can be stored in the browser.
-## 6. Rendering Books
+## 6. Small AJAX Part
+```js
+$.getJSON('data/default-books.json').done(data => {
+    books = data;
+    renderBooks();
+}).fail(renderBooks);
+```
+This is jQuery AJAX. It loads starter books from `data/default-books.json` when there are no saved books in `localStorage`. If loading fails, `.fail(renderBooks)` still displays the built-in default books.
+## 7. Rendering Books
 ```js
 function renderBooks(filter = "") {
     const term = filter.toLowerCase();
@@ -60,7 +68,7 @@ function renderBooks(filter = "") {
 }
 ```
 `renderBooks()` displays the catalog. It also filters books when the user searches. `.filter()` creates a matching list, `.toLowerCase()` makes the search case-insensitive, and `.includes()` checks if the title contains the search text.
-## 7. Building Table Rows
+## 8. Building Table Rows
 ```js
 bookList.innerHTML = filteredBooks.map(book => {
     const index = books.indexOf(book);
@@ -74,18 +82,18 @@ bookList.innerHTML = filteredBooks.map(book => {
 }).join('');
 ```
 This replaces jQuery `.append()`. `.map()` creates an array of HTML rows, and `.join('')` turns them into one HTML string. `innerHTML` places the rows inside the table body.
-## 8. Showing And Hiding Elements
+## 9. Showing And Hiding Elements
 ```js
 noResults.style.display = filteredBooks.length ? 'none' : 'block';
 bookTable.style.display = filteredBooks.length ? 'table' : 'none';
 ```
 This replaces jQuery `.show()` and `.hide()`. It uses JavaScript style changes and a ternary operator.
-## 9. Updating The Book Count
+## 10. Updating The Book Count
 ```js
 bookCount.textContent = `Total Books: ${books.length}`;
 ```
 This replaces jQuery `.text()`. `textContent` changes the visible text of an element.
-## 10. Reading Form Data
+## 11. Reading Form Data
 ```js
 function getFormData() {
     return {
@@ -97,7 +105,7 @@ function getFormData() {
 }
 ```
 This replaces jQuery `.val()`. `.value` reads input values, and `.trim()` removes extra spaces.
-## 11. Filling The Form For Editing
+## 12. Filling The Form For Editing
 ```js
 function fillForm(book, index) {
     formTitle.textContent = 'Edit Book';
@@ -108,7 +116,7 @@ function fillForm(book, index) {
 }
 ```
 This switches the form to edit mode. `Object.keys(inputs)` loops through `id`, `title`, `author`, and `category`, then copies the selected book values into the form.
-## 12. Resetting The Form
+## 13. Resetting The Form
 ```js
 function resetForm() {
     formTitle.textContent = 'Register Book';
@@ -119,7 +127,7 @@ function resetForm() {
 }
 ```
 This returns the form to add mode. `form.reset()` clears the form fields.
-## 13. Form Submission
+## 14. Form Submission
 ```js
 form.addEventListener('submit', event => {
     event.preventDefault();
@@ -128,17 +136,17 @@ form.addEventListener('submit', event => {
 });
 ```
 This replaces jQuery `.on('submit', ...)`. `addEventListener()` listens for the submit event, and `preventDefault()` stops the page from refreshing.
-## 14. Duplicate ID Validation
+## 15. Duplicate ID Validation
 ```js
 const isDuplicate = books.some((book, index) => book.id === bookData.id && index !== editIndex);
 ```
 `.some()` checks whether another book already has the same ID. `index !== editIndex` allows the edited book to keep its own ID.
-## 15. Add Or Update Logic
+## 16. Add Or Update Logic
 ```js
 editIndex === -1 ? books.push(bookData) : books[editIndex] = bookData;
 ```
 This short ternary replaces a longer `if/else`. If `editIndex` is `-1`, a new book is added. Otherwise, the selected book is updated.
-## 16. Edit And Delete Events
+## 17. Edit And Delete Events
 ```js
 bookList.addEventListener('click', event => {
     const button = event.target.closest('button');
@@ -150,12 +158,12 @@ This is JavaScript event delegation. It listens on the table body and checks whi
 const index = Number(button.dataset.index);
 ```
 `dataset.index` reads the `data-index` value from the clicked button.
-## 17. Search And Cancel
+## 18. Search And Cancel
 ```js
 el('search-input').addEventListener('keyup', event => renderBooks(event.target.value));
 cancelBtn.addEventListener('click', resetForm);
 ```
-These replace jQuery event handlers. Typing in the search box calls `renderBooks()`, and clicking cancel resets the form.
-## 18. Final Summary
-Plain JavaScript now handles element selection, rendering, form values, validation, add/edit/delete, search, display changes, and localStorage.
-jQuery remains only for the small page-ready wrapper and smooth-scroll animation.
+These are small jQuery event handlers. Typing in the search box calls `renderBooks()`, and clicking cancel resets the form.
+## 19. Final Summary
+Plain JavaScript still handles most of the app: element selection, rendering, form values, validation, add/edit/delete, display changes, and localStorage.
+jQuery remains for the page-ready wrapper, smooth-scroll animation, AJAX starter-book loading, search typing, and cancel-click handling.
