@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | FET Library Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="dashboard-body">
+    <header>
+        <nav class="container">
+            <div class="logo">FET<span>LIBRARY</span></div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html" class="btn-primary">Dashboard</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="dashboard-hero">
+            <div>
+                <p class="eyebrow">Faculty of Engineering and Technology</p>
+                <h1>Library Dashboard</h1>
+                <p>Register, search, edit, and manage faculty books from one organized catalog.</p>
+            </div>
+        </section>
+
+        <div class="dashboard-container">
+            <!-- Sidebar: Book Registration Form -->
+            <aside class="card form-card">
+                <h2 id="form-title">Register Book</h2>
+                <form id="book-form">
+                    <input type="hidden" id="edit-index" value="-1">
+                    <div class="form-group">
+                        <label for="book-id">Book ID</label>
+                        <input type="text" id="book-id" placeholder="e.g. FET-101" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="book-title">Book Title</label>
+                        <input type="text" id="book-title" placeholder="e.g. Engineering Drawing for Students" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="book-author">Author</label>
+                        <input type="text" id="book-author" placeholder="e.g. Ngwa Patrick" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="book-category">Category</label>
+                        <select id="book-category" required>
+                            <option value="">Select Category</option>
+                            <option value="Computer Engineering">Computer Engineering</option>
+                            <option value="Civil Engineering">Civil Engineering</option>
+                            <option value="Electrical Engineering">Electrical Engineering</option>
+                            <option value="Mechanical Engineering">Mechanical Engineering</option>
+                            <option value="Telecommunications">Telecommunications</option>
+                            <option value="Software Engineering">Software Engineering</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-block" id="submit-btn">Add Book to Catalog</button>
+                    <button type="button" class="btn-block btn-muted" id="cancel-btn">Cancel Edit</button>
+                </form>
+            </aside>
+
+            <!-- Main Content: Book Display and Search -->
+            <section class="main-content">
+                <div class="search-bar">
+                    <span class="search-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <circle cx="11" cy="11" r="6"></circle>
+                            <path d="m16 16 4 4"></path>
+                        </svg>
+                    </span>
+                    <input type="text" id="search-input" placeholder="Search books by title...">
+                </div>
+
+                <div class="card catalog-card">
+                    <div class="table-header">
+                        <h2>Book Catalog</h2>
+                        <span id="book-count">Total Books: 0</span>
+                    </div>
+                    <div class="table-container">
+                        <table id="book-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Category</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="book-list">
+                                <!-- Books will be injected here by jQuery -->
+                            </tbody>
+                        </table>
+                        <div id="no-results">
+                            No books found matching your search.
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Group 12 | 2025-2026</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

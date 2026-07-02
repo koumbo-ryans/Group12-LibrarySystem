@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FET Library | Management System</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">FET<span>LIBRARY</span></div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="dashboard.html" class="btn-primary">Go to Dashboard</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="home" class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <h1>Faculty Library <br>Management System</h1>
+            <p>A practical digital catalog for the Faculty of Engineering and Technology, built to organize books, support students, and simplify library record keeping.</p>
+            <div class="hero-btns">
+                <a href="dashboard.html" class="btn-large">Get Started</a>
+                <a href="#features" class="btn-outline">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container grid">
+            <div class="about-text">
+                <h2>Faculty of Engineering and Technology</h2>
+                <p>The FET Library Management System supports engineering and technology students with an organized, easy-to-use digital catalog for academic resources.</p>
+                <p>From programming and power systems to construction materials and telecommunications, the platform keeps important faculty books simple to register, search, and manage.</p>
+                <ul class="about-points">
+                    <li><span>01</span>Structured catalog for engineering and technology resources</li>
+                    <li><span>02</span>Search, edit, and delete records with jQuery-powered interactions</li>
+                    <li><span>03</span>Local browser storage for a practical JavaScript demonstration</li>
+                </ul>
+            </div>
+            <div class="about-img">
+                <img src="assets/about-bg.jpg" alt="Library Stacks">
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose FET Library?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"></path>
+                            <path d="M4 5.5A2.5 2.5 0 0 1 6.5 8H20"></path>
+                            <path d="M8 12h8"></path>
+                            <path d="M8 15h6"></path>
+                        </svg>
+                    </div>
+                    <h3>Smart Registration</h3>
+                    <p>Effortlessly capture book details including ID, Title, Author, and Category with real-time validation.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <circle cx="11" cy="11" r="6"></circle>
+                            <path d="m16 16 4 4"></path>
+                            <path d="M8.5 11h5"></path>
+                        </svg>
+                    </div>
+                    <h3>Instant Search</h3>
+                    <p>Find any volume in your vast collection instantly with our optimized search algorithm.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M4 6h16"></path>
+                            <path d="M4 12h16"></path>
+                            <path d="M4 18h16"></path>
+                            <circle cx="9" cy="6" r="2"></circle>
+                            <circle cx="15" cy="12" r="2"></circle>
+                            <circle cx="10" cy="18" r="2"></circle>
+                        </svg>
+                    </div>
+                    <h3>Full Control</h3>
+                    <p>Edit and delete entries with ease, maintaining a pristine and up-to-date digital catalog.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>Group 12 | 2025-2026</p>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
